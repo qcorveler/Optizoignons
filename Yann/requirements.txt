@@ -1,0 +1,6 @@
+pandas==2.3.3
+torch==2.5.1
+tensorflow==2.19.1
+xgboost==3.0.5
+botorch==0.15.1
+pyomo==6.9.4
