@@ -28,4 +28,19 @@ réexpliquer sur quoi faire la regression linéaire et à quoi elle sert.
 
 Comment avancer ?
 
+# Présentation # 1
+
+Plan :
+- Introduction
+- Présentation du dynamic pricing
+- Présentation de la compétition
+- Première stratégie -> RANDOM (premiers résultats)
+- Estimation de la booking curve
+- Implémentation d'un algo pour suivre la booking curve "optimale"
+- Estimation de la demande en fonction du temps -> Observation de la tendance (ça augmente avec le temps)
+- Estimation et du revenu en fonction de notre prix et du prix du compétiteur (en 5 fois 20 jours)
+- Parler de comment implémenter un algo qui prenne en compte tout ça
+- Améliorations possibles 
+	+ Calcul de la sensibilité
+	+ Calcul de l'Elasticité 
   
