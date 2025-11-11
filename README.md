@@ -44,3 +44,45 @@ Plan :
 	+ Calcul de la sensibilité
 	+ Calcul de l'Elasticité 
   
+
+
+# Cours du 11.11.25
+Les régressions linéaires vues pendant les présentations étaient nulles
+-> On va essayer de comprendre pourquoi
+
+Regression model \
+*d(p1, p2) = beta0 + beta1\*p1 + beta2\*p2*
+
+The real demand values are integers but our demand function returns a float.
+
+Objective functions pour la régression :
+- Somme du carré des différences (OLS)
+- Somme de la valeur abs des différences divisées par le nombre d'observation (LAD)
+
+Assumptions : 
+- d décroît de façon monotone avec p1 (notre prix)
+- d croît de façon monotone avec p2 (prix du concurrent)
+- d dépend un peu du temps (croît de façon monotone)
+
+=> *d(p1, p2, t) = beta_0t + beta_1t\*p1 + beta_2t\*p2*
+
+avec pas beaucoup de différence entre t-1, t et t+1 pour les paramètre : \
+*|beta_kt - beta_kt-1| <= delta*
+
+- d est symétrique selon p1 et p2
+
+*d(p1, p2, t) = d_own* \
+*d(p2, p1, t) = d_comp*
+
+Donc maintenant, on doit intégrer le temps, les valeurs entières et des paramètres légèrement différents en adéquation avec le temps *t*.
+
+En utilisant une fonction pour arrondir à l'entier le plus proche on va déjà peut être améliorer nos modèles
+
+ce qui nous amène à l'introduction de pyomo (bibliothèque python)
+
+### Pyomo introduction
+
+mobook.github.io/MO-book/intro.html
+
+pyomo.readthedocs.io/en/6.8.0/tutorial_examples.html
+
