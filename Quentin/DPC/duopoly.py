@@ -2,6 +2,7 @@ from typing import Any, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 import sys
+import pyomo.environ as pyo
 
 def p(
         current_selling_season: int,
