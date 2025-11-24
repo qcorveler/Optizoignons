@@ -86,3 +86,7 @@ mobook.github.io/MO-book/intro.html
 
 pyomo.readthedocs.io/en/6.8.0/tutorial_examples.html
 
+
+
+# Un truc à faire 
+On pourrait apprendre 3 ou 4 scénarios de demande différente, genre low demand, medium, high ... Essayer de déterminer à l'avance dans quel cas on est, et en fonction ajuster différemment le prix
