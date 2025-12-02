@@ -90,3 +90,9 @@ pyomo.readthedocs.io/en/6.8.0/tutorial_examples.html
 
 # Un truc à faire 
 On pourrait apprendre 3 ou 4 scénarios de demande différente, genre low demand, medium, high ... Essayer de déterminer à l'avance dans quel cas on est, et en fonction ajuster différemment le prix
+
+
+Pour la prochaine fois :
+- Faire 3 ou 4 scénarios de demande différentes (low, medium, high ...)
+- Essayer de faire une estimation dynamique du prix du compétiteur (par exemple récupérer les données pendant 20 saisons et les utiliser pour les 80 suivantes)
+- Estimer le prix
