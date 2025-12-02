@@ -3,6 +3,43 @@
 ## Lien canva
 https://www.canva.com/design/DAG2t1rRtMg/Hw2CsxX2Y7zGM7q9hEepUw/edit?utm_content=DAG2t1rRtMg&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 
+---
+---
+
+## Organisation du git
+
+### └ Travail commun
+Dans ce dossier on trouve les résultats des notebooks d'exercices fait en cours et d'autres ressources fournies par les profs.
+
+### └ Travail perso
+Dans ce dossier on trouve un sous-dossier par personne pour faire un peu bac à sable et tester ce qu'on veut avec les ressources qu'on veut.
+
+### └ Resultats
+C'est là qu'on met tous nos résultats, organisés de la manière suivante : \
+└ Un sous-dossier par jours où on récupère les résultats \
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└ Un sous-sous-dossier par personne
+ 
+C'est aussi là que je propose de mettre le fichier d'analyse des résultats et de mettre les courbes qu'on peut en tirer, dans un sous-dossier Analyse en essayant de le ranger au mieux possible
+
+### └ Duopoly
+Ici on a un sous-dossier par personne pour juste mettre notre duopoly le plus récent
+(On peut imaginer avoir un sous-sous-dossier par jour pour avoir une trace des anciens duopoly)
+
+---
+---
+
+
+# TODO
+On pourrait apprendre 3 ou 4 scénarios de demande différente, genre low demand, medium, high ... Essayer de déterminer à l'avance dans quel cas on est, et en fonction ajuster différemment le prix
+
+
+Pour la présentation :
+- Faire 3 ou 4 scénarios de demande différentes (low, medium, high ...)
+- Essayer de faire une estimation dynamique du prix du compétiteur (par exemple récupérer les données pendant 20 saisons et les utiliser pour les 80 suivantes)
+
+
+---
+---
 
 ## Stratégies utilisées
 
@@ -87,12 +124,3 @@ mobook.github.io/MO-book/intro.html
 pyomo.readthedocs.io/en/6.8.0/tutorial_examples.html
 
 
-
-# Un truc à faire 
-On pourrait apprendre 3 ou 4 scénarios de demande différente, genre low demand, medium, high ... Essayer de déterminer à l'avance dans quel cas on est, et en fonction ajuster différemment le prix
-
-
-Pour la prochaine fois :
-- Faire 3 ou 4 scénarios de demande différentes (low, medium, high ...)
-- Essayer de faire une estimation dynamique du prix du compétiteur (par exemple récupérer les données pendant 20 saisons et les utiliser pour les 80 suivantes)
-- Estimer le prix
