@@ -4,7 +4,11 @@
 https://www.canva.com/design/DAG2t1rRtMg/Hw2CsxX2Y7zGM7q9hEepUw/edit?utm_content=DAG2t1rRtMg&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 
 ---
----
+
+## Lien Trello
+https://trello.com/invite/b/692f0bab55dd8e582c4a6e8b/ATTIf6c35ecf562b791a1d43e338ba826eed7C380D92/optizonions
+
+--- 
 
 ## Organisation du git
 
@@ -26,7 +30,6 @@ Ici on a un sous-dossier par personne pour juste mettre notre duopoly le plus r�
 (On peut imaginer avoir un sous-sous-dossier par jour pour avoir une trace des anciens duopoly)
 
 ---
----
 
 
 # TODO
@@ -38,7 +41,6 @@ Pour la présentation :
 - Essayer de faire une estimation dynamique du prix du compétiteur (par exemple récupérer les données pendant 20 saisons et les utiliser pour les 80 suivantes)
 
 
----
 ---
 
 ## Stratégies utilisées
