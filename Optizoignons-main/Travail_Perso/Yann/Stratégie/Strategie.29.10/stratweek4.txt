@@ -1,0 +1,28 @@
+##  Logique de la stratégie
+
+### 1. **Initialisation (jour 1 de chaque saison)**
+
+- Création (ou chargement) d’un objet de suivi `information_dump` :
+  - Historique des ventes et prix
+  - Recettes cumulées
+  - Paramètres internes (`factor`, `last_base_price`, etc.)
+- Un identifiant unique de simulation est généré (`uuid4`).
+- Le prix initial est choisi **aléatoirement entre 30 et 50**.
+
+---
+
+### 2. **Mise à jour quotidienne du prix**
+
+À chaque jour `day`, la méthode ajuste le prix selon la situation :
+
+#### 🔹 Tous les 5 jours :
+- Récupération de la **capacité cible** (`cap_util`) à partir d’une courbe externe (`courbe`), chargée depuis `target_sales_curve_quentin.pkl`.
+- Calcul du **facteur d’ajustement** selon la capacité restante :
+
+  ```python
+  factor = (remaining_capacity / 80) / capacity_obj
+À chaque jour `day`, la méthode ajuste le prix selon la situation :
+
+Les autres jours :
+Le prix du jour est simplement diminué de 5 % pour maintenir la compétitivité :
+price_today *= 0.95
