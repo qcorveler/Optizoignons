@@ -3,6 +3,9 @@ import numpy as np
 import pandas as pd
 import sys
 import pyomo.environ as pyo
+import pickle
+
+from river import linear_model, metrics, preprocessing, optim
 
 def p(
         current_selling_season: int,
@@ -28,7 +31,24 @@ def p(
     """
     
     if (selling_period_in_current_season <= 1):
-        return np.random.randint(30, 90), None
+        model = (
+            preprocessing.StandardScaler() |
+            linear_model.LinearRegression(l2=0.01, optimizer=optim.SGD(0.01))
+        )
+        metrics_list = {
+            "R²": metrics.R2(),
+            "MAE": metrics.MAE(),
+            "MSE": metrics.MSE(),
+            "RMSE": metrics.RMSE()
+        }
+
+        metric_list_simple = {
+            "R²": metrics.R2(),
+            "MAE": metrics.MAE(),
+            "MSE": metrics.MSE(),
+            "RMSE": metrics.RMSE()
+        }
+        return np.random.randint(30, 90), {"model": model, "metrics": metrics_list, "copycat_metrics": metric_list_simple, "use_model" : False}
 
 
     # TODO : ajouter une façon de fournir des fichiers csv
@@ -37,6 +57,67 @@ def p(
 
     # On récupère l'indice de la période précédente
     last_period_index = selling_period_in_current_season-1
+
+    ### Prediction of the price of the competitor
+
+    # Learning process
+    model = information_dump['model']
+    metrics_list = information_dump['metrics']
+    copycat_metrics = information_dump['copycat_metrics']
+    use_model = information_dump['use_model']
+
+    competitor_price_lag2 = prices_historical_in_current_season[1][last_period_index-2] if last_period_index-2 >= 0 else 50.0 # 1 correspond au compétiteur (-2 cause index begin at 0 although period begin at 1)  
+    price_lag2 = prices_historical_in_current_season[0][last_period_index-2] if last_period_index-2 >= 0 else 50.0 
+    competitor_price_lag1 = prices_historical_in_current_season[1][last_period_index-1]
+
+    if current_selling_season <= 25:
+        x = {
+            'selling_period': selling_period_in_current_season,
+            'price_competitor_lag1': competitor_price_lag2,
+            'price_self_lag1': price_lag2
+            # 'price_competitor_lag2': history['price_competitor'][-2] if selling_period_in_current_season>2 else 0.0,
+        }
+        y = competitor_price_lag1
+
+        # predict and learn
+        y_pred = model.predict_one(x)
+        y_pred_copycat = competitor_price_lag2
+
+        # Update metrics
+        for metric in metrics_list.values():
+            if y_pred is not None:
+                metric.update(y, y_pred)
+        for metric in copycat_metrics.values():
+            if y_pred_copycat is not None:
+                metric.update(y, y_pred_copycat)
+
+        model.learn_one(x, y_pred)
+
+    # determination of model parameters for the end of the competition
+    if current_selling_season == 25:
+        FEEDBACK_OBJECT = {
+            "Final model metrics:" : {name: f"{metric.get():.4f}" for name, metric in metrics_list.items()},
+            "Copycat model metrics:" : {name: f"{metric.get():.4f}" for name, metric in copycat_metrics.items()},
+        }
+        if metrics_list["R²"].get() > copycat_metrics["R²"].get():
+            use_model = True
+        else:
+            use_model = False
+
+        FEEDBACK_OBJECT["Use model for final seasons:"] = use_model
+
+        with open('duopoly_feedback.data', 'wb') as handle:
+            pickle.dump(FEEDBACK_OBJECT, handle, protocol=pickle.HIGHEST_PROTOCOL)
+ 
+    # prediction of the competitor price 
+    competitor_price_prediction = competitor_price_lag1 # for the 25 first seasons, we use the lag1 price as prediction
+    if current_selling_season >= 25 :
+        if use_model : 
+            competitor_price_prediction = model.predict_one({
+                'selling_period': selling_period_in_current_season,
+                'price_competitor_lag1': competitor_price_lag1,
+                'price_self_lag1': prices_historical_in_current_season[0][last_period_index-1]
+            })
 
     # On récupère le stock cible vendu selon la courbe référence 
     # target_stock_saled = reference.iloc[last_period_index]
@@ -61,4 +142,4 @@ def p(
     # On évite que le prix devienne négatif ou trop bas trop vite ou trop haut trop vite
     new_price = min(max(new_price, last_price * 0.8), last_price * 1.2) 
     new_price = max(min(new_price, 100), 5) # Faire en sorte que ce soit capé entre 5 et 100
-    return new_price, None
+    return new_price, {"model": model, "metrics": metrics_list, "copycat_metrics": copycat_metrics, "use_model" : use_model}
