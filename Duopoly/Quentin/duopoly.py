@@ -54,7 +54,7 @@ def p(
     # Mise à jour du prix
     last_price = prices_historical_in_current_season[0][last_period_index-1] # 0 correspond à nos prix
     print(f"Last price : {last_price}")
-    alpha = 0.1 # valeur de sensibilité de l'ajustement du prix
+    alpha = 0.2 # valeur de sensibilité de l'ajustement du prix
     new_price =  last_price * (1 + alpha * delta)
     print(f"new price : {new_price}")
     
