@@ -6,9 +6,14 @@ import pickle
 
 
 # We load model parameters and target sales curve
-model_params = pd.read_csv('/root/partcipant_folder/modeles_moyens_elasticite.csv')
+
 with open('/root/partcipant_folder/target_sales_curve.pkl', 'rb') as f:
         courbe = pickle.load(f)
+with open('/root/partcipant_folder/modeles_moyens_elasticite.pkl', 'rb') as f:
+        model_params = pickle.load(f)
+
+model_params = pd.DataFrame(model_params)
+
 # For local testing 
 # model_params = pd.read_csv('modeles_moyens_elasticite.csv')
 # with open('target_sales_curve.pkl', 'rb') as f:
