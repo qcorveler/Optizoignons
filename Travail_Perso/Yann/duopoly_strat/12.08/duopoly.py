@@ -41,7 +41,7 @@ def _initialize_data_feedback():
                     'target_demand' : [],
                     'own_price': [],
                     'competitor_price': [],
-                    'remaining_capacity': [],
+                    'sold_items': [],
                     'revenue': [],
                     'cumulative_revenue': [],
                     'demand_model_used': [],
@@ -180,8 +180,8 @@ def p(
 
         else :
             capacity_obj = courbe[day+5]['cap_util']
-        remaining_capacity = (80 - np.sum(demand))/80
-        objective_demand_for_next_5_days = capacity_obj - remaining_capacity 
+        sold_items = (np.sum(demand))/80
+        objective_demand_for_next_5_days = capacity_obj - sold_items 
         target_daily_demand = (objective_demand_for_next_5_days / 5)*80
         information_dump['target_daily_demand'] = target_daily_demand
 
@@ -207,7 +207,7 @@ def p(
         'demand': last_demand,
         'own_price': last_price,
         'competitor_price': last_comp_price,
-        'remaining_capacity': 80 - np.sum(demand),
+        'sold_items': 80 - np.sum(demand),
         'revenue': revenue,
         'cumulative_revenue': rev_sofar + revenue,
         'demand_model_used': model_idx,
