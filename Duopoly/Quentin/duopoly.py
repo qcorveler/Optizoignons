@@ -227,6 +227,7 @@ def p(
         use_model = metrics_list["R²"].get() > copycat_metrics["R²"].get()
 
         FEEDBACK_OBJECT["Use model for final seasons:"] = use_model
+        information_dump["use_model"] = use_model
 
         with open('duopoly_feedback.data', 'wb') as handle:
             pickle.dump(FEEDBACK_OBJECT, handle, protocol=pickle.HIGHEST_PROTOCOL)

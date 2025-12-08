@@ -1,0 +1,287 @@
+[33mcommit 52300ec429cb1e0a9c3bd85a12dae65a081b39a5[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Merge: f249e1c 6ad1d9f
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Mon Dec 8 19:51:08 2025 +0100
+
+    récupération de mon duopoly qeuntin
+
+[33mcommit f249e1c54fa4ef2262694d72684ca624ac6979d1[m
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Mon Dec 8 16:59:50 2025 +0100
+
+    combo yann quentin
+
+[33mcommit 6ad1d9f2c3f5fcec526063640d3984aa424c5490[m
+Merge: ddcd5ff f594b3b
+Author: louizamezine <louiza.mezine@cpe.fr>
+Date:   Mon Dec 8 16:58:41 2025 +0100
+
+    128
+
+[33mcommit f594b3ba6dc5012e623a4534e0a85c2776e1f56a[m
+Author: Yannlhotel <yann.lhotelier@orange.fr>
+Date:   Mon Dec 8 15:57:16 2025 +0100
+
+    Erreur de calcul de demande normalement réglé
+
+[33mcommit 657c5ecb4c0463f2f96c2b06c377fe7f220835fc[m
+Author: Yannlhotel <yann.lhotelier@orange.fr>
+Date:   Mon Dec 8 12:55:59 2025 +0100
+
+    Nothing
+
+[33mcommit c3944940aa79a8e9d460b0c7dc3dc039d3efd623[m
+Merge: 91cde62 77f106d
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Thu Dec 4 00:50:57 2025 +0100
+
+    Merge branch 'main' of https://github.com/qcorveler/Optizoignons
+
+[33mcommit 91cde6200346513093131faf4fd5c505c09f2cde[m
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Thu Dec 4 00:50:34 2025 +0100
+
+    model implémenté dans le duopoly
+
+[33mcommit 77f106d82befd138a951a890e27cd06f49cd0316[m
+Author: Yannlhotel <yann.lhotelier@orange.fr>
+Date:   Wed Dec 3 20:41:02 2025 +0100
+
+    correction
+
+[33mcommit 7585e1d9d2633678126eeed6e9d1b6da8aada3e7[m
+Author: Yannlhotel <yann.lhotelier@orange.fr>
+Date:   Wed Dec 3 19:00:13 2025 +0100
+
+    You will find my work in Duopoly/Yann
+
+[33mcommit e3c8ecf4365eb91ced1a034e8a9b808ec12c81ca[m
+Merge: 0271104 e9b78e8
+Author: Yannlhotel <yann.lhotelier@orange.fr>
+Date:   Wed Dec 3 18:56:55 2025 +0100
+
+    Merge branch 'main' of github.com:qcorveler/Optizoignons
+
+[33mcommit 02711044baaf9422a9e4734cae7c77ed67cdc54c[m
+Author: Yannlhotel <yann.lhotelier@orange.fr>
+Date:   Wed Dec 3 18:56:33 2025 +0100
+
+    Add dynamic pricing regarding of 3 demand types
+
+[33mcommit e9b78e82d216fbc10964a3fd97ae5a09973351af[m
+Merge: 836b836 7b7c66a
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Wed Dec 3 17:55:12 2025 +0100
+
+    Merge branch 'main' of https://github.com/qcorveler/Optizoignons
+
+[33mcommit 836b836cb54a3dc22ec907aaf92b2cf3e668cc7b[m
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Wed Dec 3 17:55:09 2025 +0100
+
+    Implémentation du duopoly Quentin pour apprendre online le prix du competitor
+
+[33mcommit 7b7c66a3ba1b38978e9b41d1560b694a28dc967f[m
+Merge: 36b41cc 72383e9
+Author: Yannlhotel <yann.lhotelier@orange.fr>
+Date:   Wed Dec 3 15:51:09 2025 +0100
+
+    MAJ Yann
+
+[33mcommit 36b41ccb5661403ac55cae77235dbddb80672e49[m
+Author: Yannlhotel <yann.lhotelier@orange.fr>
+Date:   Wed Dec 3 10:03:13 2025 +0100
+
+    Try push before pull
+
+[33mcommit 72383e98fe4f5792813dbd251fbedca4dc518083[m
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Wed Dec 3 02:02:20 2025 +0100
+
+    modèle de prédiction du prix de l'adversaire en itératif
+
+[33mcommit ddcd5ffb19afdf4215c35d746ada633fb4a52015[m
+Author: louizamezine <louiza.mezine@cpe.fr>
+Date:   Tue Dec 2 23:27:16 2025 +0100
+
+    l
+
+[33mcommit 6c706015790af3a033999026637d8100167b6db4[m
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Tue Dec 2 20:39:03 2025 +0100
+
+    modification légère de mon algo (adaptation de la sensibilité pour que les changements soient moins abruptes)
+
+[33mcommit 62a2c1aa84a71a87faae71a83ab64058bb5833b3[m
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Tue Dec 2 17:37:57 2025 +0100
+
+    Ajout du lien du trello dans le README
+
+[33mcommit 4e95489b96adeac5ee2414113a6d87bdab9062da[m
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Tue Dec 2 16:48:45 2025 +0100
+
+    Restructuration du git et modification du README
+
+[33mcommit 0263840b7f80c8eb63de84530b5f48afcb303944[m
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Tue Dec 2 16:47:50 2025 +0100
+
+    Restructuration du git et modification du README
+
+[33mcommit 914a6eb32f53d4d48e7a80227ecb3a4d851fe5a8[m
+Merge: b336da2 d9b2c22
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Tue Dec 2 16:04:57 2025 +0100
+
+    Merge branch 'main' of https://github.com/qcorveler/Optizoignons
+
+[33mcommit b336da26dc3cdf2284010036f956d2dd2889535b[m
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Tue Dec 2 16:04:53 2025 +0100
+
+    modif README
+
+[33mcommit d9b2c2289eb9127d012d0daef739f180471d0688[m
+Merge: d0a563f 8c9d628
+Author: Yannlhotel <yann.lhotelier@orange.fr>
+Date:   Mon Nov 24 16:15:17 2025 +0100
+
+    MAJ
+
+[33mcommit d0a563fe75b890c0ddaf31573a287ef18ba9a629[m
+Merge: c105c87 df2760b
+Author: Yannlhotel <yann.lhotelier@orange.fr>
+Date:   Tue Nov 18 11:08:31 2025 +0100
+
+    Nothing
+
+[33mcommit 8c9d62864e1e036de3606700540e1378fb563a46[m
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Tue Nov 18 11:07:34 2025 +0100
+
+    Ajout des contraintes de roundin
+
+[33mcommit c105c870b51393283a8a3eff12afa0cbde82447a[m
+Author: Yannlhotel <yann.lhotelier@orange.fr>
+Date:   Tue Nov 18 09:54:38 2025 +0100
+
+    10:00 avant la clope
+
+[33mcommit df2760bc603a0e8e0609193d8e5c8e9f95a9d89d[m
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Tue Nov 18 09:52:41 2025 +0100
+
+    regression sur la demande
+
+[33mcommit f22c6f57cc0c2c8ce1b7ebf2f4b668adb924d450[m
+Merge: 73a9d64 a72bbe2
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Tue Nov 18 08:44:12 2025 +0100
+
+    Merge branch 'main' of https://github.com/qcorveler/Optizoignons
+
+[33mcommit 73a9d64a9b84baf74ceaf3e58a37b84df9d2ff54[m
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Tue Nov 18 08:44:06 2025 +0100
+
+    Je sais plus ce que j'ai modifié
+
+[33mcommit a72bbe24b114b11816cc25b8f88195631e204f50[m
+Author: louizamezine <louiza.mezine@cpe.fr>
+Date:   Tue Nov 18 08:43:20 2025 +0100
+
+    partie louiza
+
+[33mcommit 6c43071308b1620ee11fc30729b3de6b5b527ee8[m
+Author: Yannlhotel <yann.lhotelier@orange.fr>
+Date:   Wed Nov 12 10:35:05 2025 +0100
+
+    Add of requirements.yml for conda env and runable script in Optimization folder
+
+[33mcommit 380e12f67e9666863f473c5064234c38936b25e2[m
+Author: Yannlhotel <yann.lhotelier@orange.fr>
+Date:   Wed Nov 12 09:07:17 2025 +0100
+
+    Add optimizationscripts
+
+[33mcommit 1f32e269eeafb11671881fe46a8e86475e9db42b[m
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Tue Nov 11 11:32:48 2025 +0100
+
+    Update le readme pour le cours
+
+[33mcommit f84790fef6813d1be35a9bea560440e07d597ea4[m
+Merge: 8e0eaff c25de33
+Author: Yannlhotel <yann.lhotelier@orange.fr>
+Date:   Tue Nov 4 11:21:35 2025 +0100
+
+    Merge branch 'main' of github.com:qcorveler/Optizoignons
+
+[33mcommit 8e0eaff1279cb73bc519e6b8fda0ca4f92c7db89[m
+Author: Yannlhotel <yann.lhotelier@orange.fr>
+Date:   Tue Nov 4 11:20:57 2025 +0100
+
+    Version 04/11
+
+[33mcommit b055b9acd0104a3131fd97b9974b63283e59b71e[m
+Author: Yannlhotel <yann.lhotelier@orange.fr>
+Date:   Tue Nov 4 11:18:19 2025 +0100
+
+    Dernière version 04/11/25
+
+[33mcommit c25de331b1a4964cec0e49b7aa9fee1185d65139[m
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Mon Nov 3 19:30:52 2025 +0100
+
+    README updated
+
+[33mcommit a092c5769db2d37aca5ebf07cd8cb2fa5663d7f4[m
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Mon Nov 3 18:16:03 2025 +0100
+
+    Ajout des derniers résultats QT1
+
+[33mcommit 42c180eefb54eb6823a941a2e0a43b602c61200e[m
+Author: Yannlhotel <yann.lhotelier@orange.fr>
+Date:   Mon Nov 3 14:04:27 2025 +0100
+
+    Le boulot de Yann est là!
+
+[33mcommit fdcc91239efe2e24c30c5880a6629a399042bc76[m
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Fri Oct 24 18:14:11 2025 +0200
+
+    Liste des statégies
+
+[33mcommit 87debf260c06693170af243ec7c433c3fab17fb4[m
+Merge: e372a80 87b7237
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Fri Oct 24 17:54:56 2025 +0200
+
+    Merge branch 'main' of https://github.com/qcorveler/Optizoignons
+
+[33mcommit e372a8064aa328136e79234732bf5f1e4bacefc1[m
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Fri Oct 24 17:54:16 2025 +0200
+
+    Ajout du lien vers le canva dans le Readme
+
+[33mcommit 87b723792b67cb97d2f1d83319be3ba9be9bfe40[m
+Author: louizamezine <145661798+louizamezine@users.noreply.github.com>
+Date:   Fri Oct 24 16:57:03 2025 +0200
+
+    Add files via upload
+
+[33mcommit 7582253812fbd98b0e48bc02242da2ad66a84692[m
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Fri Oct 24 16:43:06 2025 +0200
+
+    Ajout duopoly quentin$
+
+[33mcommit 122ef00b3549da98565fca2ec30c0e592c29dc2a[m
+Author: Quentin <quentincorveler@gmail.com>
+Date:   Fri Oct 24 16:24:47 2025 +0200
+
+    First commit
