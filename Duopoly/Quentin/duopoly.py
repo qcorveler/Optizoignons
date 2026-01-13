@@ -27,16 +27,6 @@ class OnlineLinearRegressor(nn.Module):
             w = torch.zeros(n_features, dtype=torch.float32)
             self.weights = nn.Parameter(w)
 
-    def predict(self, x_dict: dict):
-        x = torch.tensor(list(x_dict.values()), dtype=torch.float32)
-        self._init_weights(len(x))
-        with torch.no_grad():
-            return (x @ self.weights + self.bias).item()
-
-    # compatibility with .predict_one used elsewhere
-    def predict_one(self, x_dict: dict):
-        return self.predict(x_dict)
-
     def learn(self, x_dict: dict, y: float):
         x = torch.tensor(list(x_dict.values()), dtype=torch.float32)
         y = torch.tensor([y], dtype=torch.float32)
@@ -60,6 +50,18 @@ class OnlineLinearRegressor(nn.Module):
             self.weights.grad.zero_()
         if self.bias.grad is not None:
             self.bias.grad.zero_()
+
+    def predict(self, x_dict: dict):
+        x = torch.tensor(list(x_dict.values()), dtype=torch.float32)
+        self._init_weights(len(x))
+        with torch.no_grad():
+            return (x @ self.weights + self.bias).item()
+
+    # compatibility with .predict_one used elsewhere
+    def predict_one(self, x_dict: dict):
+        return self.predict(x_dict)
+
+    
 
     # compatibility with .learn_one used elsewhere
     def learn_one(self, x_dict: dict, y: float):
@@ -193,6 +195,7 @@ def p(
     competitor_price_lag1 = prices_historical_in_current_season[1][last_period_index-1]
     competitor_price_lag2 = prices_historical_in_current_season[1][last_period_index-2] if last_period_index-2 >= 0 else 50.0 # 1 correspond au compétiteur (-2 cause index begin at 0 although period begin at 1)  
     price_lag2 = prices_historical_in_current_season[0][last_period_index-2] if last_period_index-2 >= 0 else 50.0 
+# 'price_competitor_lag2': history['price_competitor'][-2] if selling_period_in_current_season>2 else 0.0,
 
     # training process
     if current_selling_season <= 25:
@@ -200,7 +203,7 @@ def p(
             'selling_period': selling_period_in_current_season,
             'price_competitor_lag1': competitor_price_lag2,
             'price_self_lag1': price_lag2
-            # 'price_competitor_lag2': history['price_competitor'][-2] if selling_period_in_current_season>2 else 0.0,
+            
         }
         y = competitor_price_lag1
 
@@ -264,7 +267,9 @@ def p(
     # Mise à jour du prix
     last_price = prices_historical_in_current_season[0][last_period_index-1] # 0 correspond à nos prix
     print(f"Last price : {last_price}")
+
     alpha = 0.2 # valeur de sensibilité de l'ajustement du prix
+    
     new_price =  last_price * (1 + alpha * delta)
     print(f"new price : {new_price}")
     
