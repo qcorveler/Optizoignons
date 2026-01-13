@@ -6,10 +6,15 @@ import pickle
 
 
 # We load model parameters and target sales curve
-model_params = pd.read_csv('/root/partcipant_folder/modeles_moyens_elasticite.csv')
+
 with open('/root/partcipant_folder/target_sales_curve.pkl', 'rb') as f:
         courbe = pickle.load(f)
-# For local testing 
+with open('/root/partcipant_folder/modeles_moyens_elasticite.pkl', 'rb') as f:
+        model_params = pickle.load(f)
+
+model_params = pd.DataFrame(model_params)
+
+# # For local testing 
 # model_params = pd.read_csv('modeles_moyens_elasticite.csv')
 # with open('target_sales_curve.pkl', 'rb') as f:
 #         courbe = pickle.load(f)
@@ -86,7 +91,7 @@ def p(
     
     day = selling_period_in_current_season
     season = current_selling_season
-    demand = demand_historical_in_current_season
+    demand = demand_historical_in_current_season if demand_historical_in_current_season is not None else np.array([0])
     last_price = prices_historical_in_current_season[0,-1]    if day > 1 else 0
     last_comp_price = prices_historical_in_current_season[1,-1]   if day > 1 else 20
     
@@ -169,8 +174,12 @@ def p(
     # --- 5. Target Demand Calculation ---
     if day % 5 == 0:
         # On doit alors mettre à jour notre besoin de demand
-        capacity_obj = courbe[day+5]['cap_util']
-        remaining_capacity = 1 - (80 - np.sum(demand))/80
+        if day >= 95:
+            capacity_obj = 80 - np.sum(demand)
+
+        else :
+            capacity_obj = courbe[day+5]['cap_util']
+        remaining_capacity = (80 - np.sum(demand))/80
         
         objective_demand_for_next_5_days = capacity_obj - remaining_capacity 
         target_daily_demand = (objective_demand_for_next_5_days / 5)*80
@@ -182,7 +191,8 @@ def p(
 
     # --- 6. Compute Price ---
     price, _ = get_best_price_target_demand(target_daily_demand, last_comp_price, para)
-    
+    if price > 100:
+        price = 100    
     information_dump['price_today'] = price
 
     # --- Mise à jour de l'information ---
@@ -217,7 +227,7 @@ def p(
     if day >= 100:
         with open('duopoly_feedback.data', 'wb') as handle:
             pickle.dump(information_dump, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
+    price = float(price)
     return price, information_dump
 
 
