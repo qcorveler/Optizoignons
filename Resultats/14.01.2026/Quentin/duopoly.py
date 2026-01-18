@@ -381,8 +381,6 @@ def p(
     
     # --- 6. Optimization ---
     # Naive Forecast: We assume competitor price today == yesterday's price
-    if comp_has_cap_int == 0:
-        competitor_price_prediction = 80.33  # Max price if no capacity
     est_comp_price_today = competitor_price_prediction
     
     final_price = get_best_price_target_demand(
@@ -391,11 +389,6 @@ def p(
         estimated_competitor_price=est_comp_price_today,
         model=model_xgboost
     )
-
-    mean_price_so_far = np.mean(prices_historical_in_current_season[0, :])
-
-    if comp_has_cap_int == 0:
-        final_price = max(1.2 * final_price, mean_price_so_far)  # Avoid too low prices if competitor has no capacity
 
     # --- 7. Save & Return ---
     # Optional: Log history to list (fast)
