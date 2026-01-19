@@ -1,0 +1,158 @@
+{
+  "files_found": [
+    "duopoly_competition_details (10).csv",
+    "duopoly_competition_details (11).csv",
+    "duopoly_competition_details (12).csv",
+    "duopoly_competition_details (13).csv",
+    "duopoly_competition_details (14).csv",
+    "duopoly_competition_details (15).csv",
+    "duopoly_competition_details (16).csv",
+    "duopoly_competition_details (17).csv",
+    "duopoly_competition_details (18).csv",
+    "duopoly_competition_details (19).csv",
+    "duopoly_competition_details (5).csv",
+    "duopoly_competition_details (6).csv",
+    "duopoly_competition_details (7).csv",
+    "duopoly_competition_details (8).csv",
+    "duopoly_competition_details (9).csv"
+  ],
+  "n_files": 15,
+  "n_rows": 670000,
+  "columns": [
+    "competition_id",
+    "selling_season",
+    "selling_period",
+    "competitor_id",
+    "price_competitor",
+    "price",
+    "demand",
+    "competitor_has_capacity",
+    "calculation_duration",
+    "errors",
+    "__source_file"
+  ],
+  "bad_columns_files": [],
+  "missing_rate_by_column": {
+    "errors": 1.0,
+    "selling_season": 0.0,
+    "competition_id": 0.0,
+    "selling_period": 0.0,
+    "competitor_id": 0.0,
+    "price": 0.0,
+    "price_competitor": 0.0,
+    "demand": 0.0,
+    "competitor_has_capacity": 0.0,
+    "calculation_duration": 0.0,
+    "__source_file": 0.0
+  },
+  "duplicate_rows_exact": 0,
+  "errors_nonempty_rows": 0,
+  "ranges": {
+    "price": {
+      "min": 5.0,
+      "p01": 5.0,
+      "p05": 5.0,
+      "median": 23.4,
+      "p95": 85.7,
+      "p99": 100.0,
+      "max": 100.0
+    },
+    "price_competitor": {
+      "min": 0.1,
+      "p01": 0.1,
+      "p05": 0.9,
+      "median": 37.0,
+      "p95": 98.9,
+      "p99": 100.0,
+      "max": 995.0
+    },
+    "demand": {
+      "min": 0.0,
+      "p01": 0.0,
+      "p05": 0.0,
+      "median": 0.0,
+      "p95": 3.0,
+      "p99": 5.0,
+      "max": 11.0
+    },
+    "calculation_duration": {
+      "min": 0.0,
+      "p01": 0.0,
+      "p05": 0.0,
+      "median": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "max": 0.025
+    },
+    "selling_season": {
+      "min": 1.0,
+      "p01": 1.9899999999997817,
+      "p05": 5.950000000004366,
+      "median": 50.5,
+      "p95": 95.04999999993015,
+      "p99": 99.01000000000931,
+      "max": 100.0
+    },
+    "selling_period": {
+      "min": 1.0,
+      "p01": 1.9899999999997817,
+      "p05": 5.950000000004366,
+      "median": 50.5,
+      "p95": 95.04999999993015,
+      "p99": 99.01000000000931,
+      "max": 100.0
+    },
+    "revenue_proxy": {
+      "min": 0.0,
+      "p01": 0.0,
+      "p05": 0.0,
+      "median": 0.0,
+      "p95": 90.0,
+      "p99": 175.5,
+      "max": 731.5
+    }
+  },
+  "outlier_counts_iqr": {
+    "price": 0,
+    "price_competitor": 1934,
+    "demand": 46784,
+    "calculation_duration": 0,
+    "revenue_proxy": 104177
+  },
+  "competition_group_summary": {
+    "n_competitions": 67,
+    "rows_per_competition": {
+      "min": 10000,
+      "median": 10000.0,
+      "max": 10000
+    }
+  },
+  "season_period": {
+    "unique_selling_season": 100,
+    "unique_selling_period": 100
+  },
+  "capacity_effect_on_demand": [
+    {
+      "competitor_has_capacity": false,
+      "count": 69858,
+      "mean": 1.205774571273154,
+      "median": 1.0
+    },
+    {
+      "competitor_has_capacity": true,
+      "count": 600142,
+      "mean": 0.6045502564393094,
+      "median": 0.0
+    }
+  ],
+  "saved": {
+    "merged_parquet": "C:\\Louiza\\Master Data Science\\Learining Optimization\\projet\\Optizoignons-main\\Travail_Perso\\outputs\\merged.parquet",
+    "head_200_csv": "C:\\Louiza\\Master Data Science\\Learining Optimization\\projet\\Optizoignons-main\\Travail_Perso\\outputs\\head_200.csv",
+    "plots_dir": "C:\\Louiza\\Master Data Science\\Learining Optimization\\projet\\Optizoignons-main\\Travail_Perso\\outputs"
+  },
+  "next_questions_for_strategy": [
+    "Score formula: profit = price*demand ? cost ? penalties ? capacity on your side ?",
+    "At decision time, do you observe competitor_has_capacity and price_competitor for the same period?",
+    "Do you choose one price per (season, period) or per row/market?"
+  ]
+}

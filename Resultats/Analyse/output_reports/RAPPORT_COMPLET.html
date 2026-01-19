@@ -1,0 +1,245 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPC - Rapport d'Analyse Complète</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .section {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        table th {
+            background-color: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        table tr:hover {
+            background-color: #f5f5f5;
+        }
+        .metric {
+            display: inline-block;
+            width: 22%;
+            margin: 1%;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .insight {
+            background-color: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .recommendation {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Dynamic Pricing Competition - Rapport d'Analyse Complet</h1>
+        <p>Analyse automatisée de tous les résultats de compétition</p>
+        <p>Généré le 2025-12-07 16:53:06</p>
+    </div>
+
+    <div class="section">
+        <h2>📈 Métriques Globales</h2>
+        <div class="metric">
+            <div>Revenu Total</div>
+            <div class="metric-value">2,579,801€</div>
+        </div>
+        <div class="metric">
+            <div>Demande Totale</div>
+            <div class="metric-value">151660 u.</div>
+        </div>
+        <div class="metric">
+            <div>Prix Moyen</div>
+            <div class="metric-value">18.73€</div>
+        </div>
+        <div class="metric">
+            <div>Revenue/Unité</div>
+            <div class="metric-value">17.01€</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🏆 Performance par Participant</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Participant</th>
+                    <th>Revenu Total</th>
+                    <th>Demande</th>
+                    <th>Prix Moyen</th>
+                    <th>Revenue/Unité</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr>
+                    <td>Louiza</td>
+                    <td>1,094,277€</td>
+                    <td>56267</td>
+                    <td>22.09€</td>
+                    <td>19.45€</td>
+                </tr>
+    
+                <tr>
+                    <td>Quentin</td>
+                    <td>1,485,524€</td>
+                    <td>95393</td>
+                    <td>16.68€</td>
+                    <td>15.57€</td>
+                </tr>
+    
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>💡 Insights Clés & Recommandations</h2>
+
+        <div class="insight">
+            <strong>💰 Tarification Optimale</strong><br>
+            La tranche de prix optimale pour maximiser le revenu se situe entre 5.00€ et 10.80€
+        </div>
+        <div class="recommendation">
+            💡 Concentrez vos prix autour de 2.51€ en revenu moyen
+        </div>
+    
+        <div class="insight">
+            <strong>📊 Sensibilité de la Demande</strong><br>
+            Corrélation prix propre-demande: -0.044
+        </div>
+        <div class="recommendation">
+            💡 Les prix sont peu sensibles à la demande - focus sur valeur
+        </div>
+    
+        <div class="insight">
+            <strong>⚔️  Réaction Concurrentielle</strong><br>
+            Corrélation de prix avec concurrent: 0.387
+        </div>
+        <div class="recommendation">
+            💡 Vous dirigez le marché - maintenue cette position
+        </div>
+    
+        <div class="insight">
+            <strong>📅 Pattern Saisonnier</strong><br>
+            Pic de demande jour 85 | Creux jour 1
+        </div>
+        <div class="recommendation">
+            💡 Augmentez les prix en période de faible demande (jour 1) pour compenser
+        </div>
+    
+        <div class="insight">
+            <strong>📦 Gestion d'Inventaire</strong><br>
+            Taux moyen d'utilisation de la capacité: 400.0%
+        </div>
+        <div class="recommendation">
+            💡 Stock bien géré - maintenue cette performance
+        </div>
+    
+        <div class="insight">
+            <strong>🔥 Guerres Tarifaires</strong><br>
+            Jours en guerre tarifaire: 25.1%
+        </div>
+        <div class="recommendation">
+            💡 Différenciez votre stratégie - fuyez les guerres de prix où les marges disparaissent
+        </div>
+    
+        <div class="insight">
+            <strong>💵 Efficacité</strong><br>
+            Revenu moyen par unité: 17.01€
+        </div>
+        <div class="recommendation">
+            💡 Cible: améliorer à 19.56€ (15% d'amélioration réaliste)
+        </div>
+    
+    </div>
+
+    <div class="section">
+        <h2>📊 Visualisations Disponibles</h2>
+        <p>Les graphiques suivants ont été générés et sauvegardés:</p>
+        <ul>
+            <li>01_distributions.png - Distribution des prix et demandes</li>
+            <li>02_revenue_by_date.html - Revenu par période</li>
+            <li>03_price_vs_revenue.png - Relation prix-revenu</li>
+            <li>04_demand_curves.png - Courbes de demande par participant</li>
+            <li>05_price_competition.html - Timeline de compétition tarifaire</li>
+            <li>06_market_positioning.png - Positionnement concurrentiel</li>
+            <li>07_seasonality_analysis.png - Patterns saisonniers</li>
+            <li>08_trends_by_participant.html - Tendances temporelles</li>
+            <li>09_complete_dashboard.html - Tableau de bord interactif</li>
+            <li>10_demand_heatmap.html - Heatmap demande-jour-participant</li>
+            <li>11_strategic_recommendations.png - Recommandations stratégiques</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>📁 Fichiers Exportés</h2>
+        <ul>
+            <li>processed_data_complete.csv - Données complètes nettoyées et enrichies</li>
+            <li>summary_statistics.csv - Statistiques résumées par participant</li>
+            <li>strategic_insights.csv - Insights et recommandations</li>
+            <li>kpi_by_date.csv - KPIs par date et participant</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        <p>Pipeline d'analyse automatisée - Dynamic Pricing Competition</p>
+        <p>Dossiers: output_charts/ (visualisations) | output_reports/ (rapports)</p>
+    </div>
+</body>
+</html>

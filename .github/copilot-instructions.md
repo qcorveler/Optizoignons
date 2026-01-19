@@ -1,129 +1,85 @@
-# Optizoignons AI Coding Agent Instructions
+# Optizoignons Codebase Instructions
 
 ## Project Overview
+**Optizoignons** is a research/learning project on dynamic pricing optimization in a competitive duopoly setting. The goal is to develop pricing algorithms that maximize revenue while competing with an opponent in an online marketplace with 80-unit inventory and 100-day selling seasons.
 
-**Optizoignons** is a dynamic pricing competition simulator where agents develop strategies to optimize revenue in a duopoly market. The core challenge is implementing a pricing algorithm that competes against competitors in seasonal market scenarios (100 days per season, multiple seasons).
+### Core Problem
+- Participants dynamically set prices to compete for demand
+- Demand is a function of both own price and competitor's price: `d(p₁, p₂) = β₀ + β₁p₁ + β₂p₂`
+- Key constraints: limited inventory, continuous seasons, observable competitor behavior
+- Optimization approaches: reference curve following, linear/LAD regression, strategic pricing models
 
-### Key Concepts
-- **Capacity**: Each competitor has 80 units per season to sell
-- **Booking Curve**: Target cumulative sales profile that agents should follow (reference curve provided)
-- **Demand Model**: Linear relationship `d(p₁, p₂, t) = β₀ₜ + β₁ₜ·p₁ + β₂ₜ·p₂` where:
-  - `p₁` = our price, `p₂` = competitor price
-  - Parameters vary by time `t` within constraints: `|βₖₜ - βₖₜ₋₁| ≤ δ`
-  - Demand values must be rounded to integers
-- **Time Dimension**: Demand changes slightly day-to-day; models must adapt parameters accordingly
+### Repository Structure
+```
+Duopoly/          → Final working pricing algorithms per person (Louiza, Quentin, Yann)
+Travail_Commun/   → Shared course materials and optimization techniques (OLS, LAD regression, production planning)
+Travail_Perso/    → Individual sandboxes organized by person with iterations and experiments
+Resultats/        → Competition results organized by date/person: {Date}/{Name}/duopoly_competition_details.csv
+```
 
-## Architecture & Core Components
+## Critical Data Structures
 
-### 1. **Algorithm Entry Point: `duopoly.py`**
-Every pricing strategy is a Python module with one function:
+### Competition Output CSV Schema
+`duopoly_competition_details.csv` contains:
+- `selling_season`, `selling_period` - 100 days per season (~30 seasons tested)
+- `price` (our algorithm), `price_competitor` - continuous values [5-100]
+- `demand` - integer units sold (highly responsive to relative pricing)
+- `competitor_has_capacity` - boolean for strategic inventory exhaustion analysis
+- `calculation_duration` - algorithm runtime (unused in analysis)
 
+### Reference Curve (Booking Curve)
+Embedded in code as `reference` array: normalized daily cumulative sales [0.004, 0.0071...0.9813]. Represents "ideal" sell-through curve to guide revenue optimization. Example usage in `Duopoly/Louiza/duopoly.py` lines 32-33.
+
+## Pricing Algorithm Patterns
+
+### Interface Convention (Required Signature)
+All pricing algorithms implement this interface:
 ```python
 def p(
     current_selling_season: int,
     selling_period_in_current_season: int,
-    prices_historical_in_current_season: Union[np.ndarray, None],
-    demand_historical_in_current_season: Union[np.ndarray, None],
+    prices_historical_in_current_season: np.ndarray,  # shape (2, period): [[our_prices], [competitor_prices]]
+    demand_historical_in_current_season: np.ndarray,  # shape (period,): actual units sold each day
     competitor_has_capacity_current_period_in_current_season: bool,
-    information_dump: Optional[Any] = None,
-) -> Tuple[float, Any]:
-    # Returns: (price, updated_information_dump)
+    information_dump=Optional[Any],
+) -> Tuple[float, Any]:  # (new_price, optional_state)
 ```
 
-**Critical Details**:
-- Called once per day for 100 days per season across multiple seasons
-- `prices_historical` = 2D array: `[our_prices, competitor_prices]`
-- `demand_historical` = 1D array of actual demands (integers, 0-80 per day)
-- `information_dump` = persistent state dictionary persisted via pickle (survives across calls)
-- Day 1 of new season: no historical data available; use this to reset season tracking
+### Algorithm Strategies Explored
+1. **Random Baseline** (`Duopoly/*/`): Prices [30-90] uniformly random. Establishes demand curve.
+2. **Reference Curve Tracking** (`Duopoly/Louiza/duopoly.py`): Compares actual cumulative sales to reference curve, adjusts price with sensitivity factor `α=0.1`. Prices constrained [5-100] and limited to ±20% change per day.
+3. **Demand Regression** (`Travail_Perso/Louiza/duopoly.py`): Fits `d ≈ β₀ + β₁p_ours + β₂p_comp` via OLS using last 6+ observations, then optimizes price. Also includes competitor reaction modeling (`p₂ ≈ γ₀ + γ₁p₁`).
+4. **State Persistence** (`Travail_Perso/Yann/duopoly.py`): Uses pickle to maintain feedback DataFrame across seasons—stores `(simulation, day, season, demand, own_price, competitor_price, revenue)` for learning.
 
-### 2. **Demand Estimation Patterns**
-Two main estimation strategies exist:
+## Development Workflows
 
-**Approach A: Linear Regression with Time-Varying Parameters** (`Travail_Perso/Quentin/DPC/duopoly.py`)
-- Estimates coefficients per season from available data
-- Uses 3 demand models, selecting best based on historical performance
-- Optimizes prices to hit target daily demand calculated from booking curve
+### Analysis Pipeline
+1. **Load Results**: `Resultats/fichier_pipeline_analyse.ipynb` loads CSVs from dated folders
+2. **Feature Engineering**: Create `revenue = price × demand`, explore correlations
+3. **Regression Study**: Use `Travail_Commun/Optimization/{02-ols,02-lad}-regression.ipynb` to understand OLS vs LAD objective functions—key insight from 11.11.25 notes: OLS (sum squared error) vs LAD (sum absolute error/n_obs) yield different sensitivities to outliers
+4. **Cross-Date Comparison**: Iterate over `Resultats/{Date}/{Name}/` directories to track algorithm improvements
 
-**Approach B: Booking Curve Following** (`Duopoly/Quentin/duopoly.py`)
-- Directly compares actual cumulative sales vs. target from `mean_curve.csv`
-- Adjusts price by factor: `new_price = last_price × (1 + α·delta)`
-- Applies dampening constraints: price changes capped ±20% per day, min 5, max 100
+### Key Dependencies
+- **Pyomo**: Non-linear optimization solver for regression (`pyomo.environ as pyo`)
+- **NumPy/Pandas**: Numerical computing and CSV handling
+- **SciPy**: `minimize_scalar` for demand model fitting (used in advanced versions)
+- **Solvers**: ipopt (non-linear), appsi_highs (linear problems)
 
-### 3. **Historical Data Management**
-- Store persistent state in `information_dump` dict (persisted to `duopoly_feedback.data` pickle file)
-- Track cumulative revenue, season-level performance metrics, and season-to-model mappings
-- Clean up pickle file at start of new simulations via `run_a_simu.py`
+### Common Issues
+- **Demand function float vs. integer**: Real demand is integer, but regression returns floats—account in threshold comparisons
+- **Competitor price history indexing**: `prices_historical[0]` = our prices, `prices_historical[1]` = competitor; ensure shape is (2, period)
+- **Reference curve boundary**: Array is fixed 100 elements; `last_period_index = period - 1` to avoid off-by-one errors
+- **Stock constraint**: Total inventory always 80 units; cumulative demand cannot exceed this
 
-### 4. **Workflow: Running Simulations**
-Use `Travail_Perso/Yann/tools/run_a_simu.py`:
+## Collaboration Conventions
+- **Code Location**: `Duopoly/{Name}/duopoly.py` for production algorithms
+- **Experiments**: Iterate in `Travail_Perso/{Name}/` before promoting
+- **Results Sharing**: CSV export to `Resultats/{YYYY.MM.DD}/{Name}/` with consistent naming
+- **Notebook Analysis**: Shared learning in `Travail_Commun/Optimization/` (e.g., regression theory, optimization techniques)
+- **Documentation**: French comments common in existing code; maintain for team clarity
 
-```python
-from tools.run_a_simu import run_a_simu
-info_dump, factors, df_select = run_a_simu(
-    csv_of_competition='duopoly_competition_details.csv',
-    s=1,
-    max_t=20,  # Days to simulate
-    is_courbe='target_sales_curve.pkl'
-)
-```
-
-This loads competition data (actual competitor prices/demand), calls your `duopoly.p()` for each day, and returns full performance details.
-
-## Conventions & Patterns
-
-### **File Organization**
-- **`Duopoly/{person}/duopoly.py`**: Latest finalized strategy per team member
-- **`Travail_Perso/{person}/`**: Personal sandbox; testing ground for new ideas
-- **`Travail_Commun/Optimization/`**: Shared notebooks for regression analysis (OLS, LAD)
-- **`Resultats/{date}/{person}/`**: CSV results from competition runs, organized by date
-- **`Travail_Perso/{person}/data/`**: Merged/processed datasets from multiple simulations
-
-### **Data Files**
-- **`mean_curve.csv`**: Reference booking curve (100-element array of cumulative sales proportions, 0.004 → 0.9813)
-- **`modeles_moyens_elasticite.csv`**: Pre-computed demand model coefficients with elasticity data
-- **`duopoly_competition_details.csv`**: Competition replay data (columns: competitor price, demand, capacity flag, selling_period)
-- **`target_sales_curve.pkl`**: Pickled dict mapping day→capacity utilization target
-
-### **Key Variables & Naming**
-- `alpha` (sensitivity factor): Controls price adjustment magnitude (0.2-0.3 typical)
-- `delta`: Relative deviation from target (actual−target)/target
-- `factor`: Internal state variable tracking model performance
-- Parameters `coeff_price`, `coeff_competitor`, `intercept`: Linear demand model coefficients
-
-## Debugging & Analysis
-
-### **Common Issues**
-1. **Day 1 calls have no history**: Always guard with `if selling_period_in_current_season <= 1`
-2. **Integer demand vs. float estimation**: Apply `round()` or `max(0, int(...))` to demand estimates
-3. **Season transitions**: Day 100 data available but new season starts fresh; track accordingly
-4. **Pickle persistence**: Delete `duopoly_feedback.data` between simulation runs to start fresh
-
-### **Regression Analysis Notebooks** (Shared)
-- **`02-ols-regression.ipynb`**: Ordinary Least Squares for demand coefficients
-- **`02-lad-regression.ipynb`**: Least Absolute Deviations (more robust to outliers)
-- **`03-production-planning-advanced.ipynb`**: Pyomo optimization for multi-period planning
-
-### **Validation Workflow**
-1. Extract competition results to CSV: columns expected are `selling_period`, `demand`, `price_competitor`, `competitor_has_capacity`
-2. Calculate cumulative revenue: `sum(demand[t] × our_price[t])` for each season
-3. Compare booking curve adherence: expected vs. actual cumulative sales
-
-## Technologies & Tools
-
-- **NumPy/Pandas**: Data handling and demand calculations
-- **Pyomo**: Optimization framework for constrained price-setting (emerging pattern; see notebooks)
-- **Pickle**: Serializing `information_dump` state across function calls
-- **Matplotlib**: Plotting demand curves, capacity utilization, revenue over time
-
-## Next Steps / Evolution
-
-Based on README notes:
-- **Scenario learning**: Build separate models for low/medium/high demand scenarios; detect scenario early
-- **Competitor price prediction**: Use first 20 days of data to estimate competitor's demand model
-- **Time-varying parameters**: Implement smoothness constraints on coefficients across days (Pyomo-based)
-- **Elasticity calculation**: Measure price sensitivity dynamically from competition data
-
----
-
-**Key Files to Study**: `Travail_Perso/Yann/duopoly_strat/12.03/duopoly.py`, `Travail_Perso/Quentin/DPC/duopoly.py`, `Travail_Perso/Yann/tools/run_a_simu.py`
+## Next Priority Areas (From TODO)
+1. Demand scenario classification: Detect low/medium/high demand regimes at runtime
+2. Dynamic competitor price modeling: Pre-learn on first ~20 days, apply to remaining 80
+3. Advanced pricing: Integrate elasticity + sensitivity calculations into optimization
+4. Regression validation: Debug why 11.11.25 regressions performed poorly—verify demand model specification
