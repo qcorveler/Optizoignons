@@ -63,7 +63,7 @@ def get_best_price_target_demand(target_demand, static_features, estimated_compe
     min_diff = float('inf')
     
     # Grid search
-    prices_to_test = np.arange(3, 100, 0.1) 
+    prices_to_test = np.arange(70, 3, -0.57) 
     
     for price in prices_to_test:
         # 1. Dynamic features (depend on OUR price)
@@ -80,7 +80,10 @@ def get_best_price_target_demand(target_demand, static_features, estimated_compe
         estimated_d = est_demand(features, model)
         
         # 4. Strategy: Reach target demand
-        if estimated_d <= target_demand:
+            # At a really low price, the demand might be really high - we want to avoid that
+            # At a really high price, demand might be zero. 
+                # We will decrease price until we reach target demand. 
+        if estimated_d >= target_demand:
             return float(price)
             
         diff = abs(estimated_d - target_demand)
@@ -182,5 +185,10 @@ def p(
         'price': final_price,
         'revenue': cumulative_revenue_season
     })
-    
+
+    # --- Sauvegarde en fin de saison ---
+    if day >= 100:
+        with open('duopoly_feedback.data', 'wb') as handle:
+            pickle.dump(information_dump, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
     return float(final_price), information_dump
