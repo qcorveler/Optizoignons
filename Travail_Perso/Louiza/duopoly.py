@@ -1,261 +1,288 @@
 from typing import Any, Optional, Tuple, Union
 import numpy as np
-from scipy.optimize import minimize_scalar
+import xgboost as xgb
+from functools import lru_cache
+#typing: pour annoter les types (utile pour le prof, lisibilité).
+#numpy as np: tableaux, clips, opérations vectorisées.
+#xgboost as xgb: modèle de régression (demand prediction).
+#lru_cache: mémoïsation pour accélérer la DP offline (évite de recalculer V(...) 100k fois).
+
+# ============================================================
+# Utils
+# ============================================================
+
+#bornes du prix final renvoyé à la plateforme
+PRICE_FLOOR = 5.0
+PRICE_CAP   = 100.0
+#bornes pour “nettoyer” le prix concurrent (parfois la donnée est bruitée / extrême / absurde)
+PC_CLIP_LO  = 0.1
+PC_CLIP_HI  = 120.0
+
+def _clip_pc(pc: float) -> float:
+    return float(np.clip(pc, PC_CLIP_LO, PC_CLIP_HI))
+
+def _bool_to_int(b: bool) -> float:
+    return 1.0 if bool(b) else 0.0
 
 
-# Estimer une courbe de demande linéaire d ≈ β0 + β1 p_ours + β2 p_comp
-#à partir de l'historique d'une saison (prix, prix conc, demande), on calcule les coeff de la reg lin (moindres carréss)
+# ============================================================
+# XGBoost demand model (trained occasionally, reused online)
+# Features: [p_ours, p_comp_clipped, cap_int]
+# ============================================================
 
-def _fit_demand_model(
-    prices_historical_in_current_season: Union[np.ndarray, None], #tableau 2D L1: nos prix passés, L2: prix conc 
-    demand_historical_in_current_season: Union[np.ndarray, None], #tableau 1D demandes
-    min_points: int = 6, #nb minimum de points pr faire la reg
-):
-    if prices_historical_in_current_season is None or demand_historical_in_current_season is None: 
-        return None #verif qu'on a bien les données
-    prices = np.asarray(prices_historical_in_current_season, dtype=float)
-    demand = np.asarray(demand_historical_in_current_season, dtype=float)
-    #forcer type float pr calcul matriciel 
-    if prices.ndim != 2 or prices.shape[0] < 1: #verif la forme du tab de prix
+#train XGBoost regression model to predict demand
+def _fit_demand_model_xgb(
+    prices_hist: Union[np.ndarray, None],#prices historiques (2D: our price + competitor price)
+    demand_hist: Union[np.ndarray, None],#demand observed (1D)
+    cap_hist: Optional[np.ndarray], #competitor capacity history encoded as 0/1 (1D)
+    min_points: int = 80,#min points to train
+    num_boost_round: int = 80 #number of boosting rounds
+) -> Optional[xgb.Booster]: #return trained XGBoost model or None if not enough data
+
+#sanity checks
+    #if not enough data, return None
+    if prices_hist is None or demand_hist is None:
         return None
-    n_obs = min(prices.shape[1], demand.shape[0])
-    #prices.shape[1] = nombre de jours où on a un prix
-    #demand.shape[0] = nombre de jours où on a une demande
-    # On prend le minimum des deux pour être sûr 
-    # qu’on a bien un couple (prix, demande) pour chaque jour
-    if n_obs < min_points:
+    #conert to numpy arrays float
+    P = np.asarray(prices_hist, dtype=float)
+    d = np.asarray(demand_hist, dtype=float)
+    #if shapes invalid, return None
+    if P.ndim != 2 or P.shape[1] == 0:
         return None
-    #extraire nos prix et ceux du concurrent
-    p_ours = prices[0, -n_obs:]
-    if prices.shape[0] > 1:
-        p_comp = prices[1, -n_obs:]
+    #d must be 1D and match number of observations
+    n = min(P.shape[1], d.shape[0])
+    #if not enough data, return None
+    if n < min_points:
+        return None
+    #get last n observations
+    p_ours = P[0, -n:]
+    #get competitor prices (clip extreme values)
+    if P.shape[0] >= 2:
+        p_comp = P[1, -n:]
     else:
-        p_comp = np.full_like(p_ours, p_ours.mean())
-    #extraire la demande correspondante
-    d = demand[-n_obs:]
-    # construire la matrice de reg
-    X = np.column_stack([np.ones_like(p_ours), p_ours, p_comp])
-    # notre reg lin (moindres carrés) 
-    try:
-        beta, *_ = np.linalg.lstsq(X, d, rcond=None)
-    except np.linalg.LinAlgError:
-        return None
-    if len(beta) != 3:
-        return None
-    return beta  # β0, β1, β2 ça renvoie le triplet 
-
-#en gros : À chaque période, je regarde l’historique récent 
-# de la saison ( prix, prix du concurrent, demandes)
-#je lance une reg lin pr approximer la demande
-
-# 
-# estimer la réaction du concurrent 
-# estimer une relation lin entre prix et prix conc : p2 ≈ γ0 + γ1 p1
-
-def _fit_competitor_reaction(
-    prices_historical_in_current_season: Union[np.ndarray, None],
-    min_points: int = 6,
-):
-    if prices_historical_in_current_season is None:
-        return None
-
-    prices = np.asarray(prices_historical_in_current_season, dtype=float)
-
-    if prices.ndim != 2 or prices.shape[0] < 2:
-        return None
-
-    p_ours = prices[0]
-    p_comp = prices[1]
-
-    n_obs = min(len(p_ours), len(p_comp))
-    if n_obs < min_points:
-        return None
-
-    p_ours = p_ours[-n_obs:]
-    p_comp = p_comp[-n_obs:]
-
-    X = np.column_stack([np.ones_like(p_ours), p_ours])
-
-    try:
-        gamma, *_ = np.linalg.lstsq(X, p_comp, rcond=None)
-    except np.linalg.LinAlgError:
-        return None
-
-    if len(gamma) != 2:
-        return None
-
-    return gamma  # γ0, γ1
-
-    #en gros : 
-    # si γ1 positif et proche de 1, le conc s’aligne sur moi.
-    # si très différent,adapter strat DP 
-    # si pas assez d’historique:
-    # strat réactive : en si beta et gamma pas fiables 
-    #alors ajuster prix en fonction du dernier prix et de derniere demande (pid)
-
-# myopic revenue maximization 
-# prix myope: prix opt pr le même jour
-#optimisateur court terme 
-#on maximise le revenue issue de
-#  la prédiction de la demande et prix conc
-def _myopic_price(beta, gamma):
-    β0, β1, β2 = beta
-    γ0, γ1 = gamma
-
-    if β1 >= -1e-4:
-        return None
-
-    def neg_rev(p1):
-        p2 = γ0 + γ1 * p1
-        d = max(β0 + β1*p1 + β2*p2, 0)
-        return -(p1 * d)
-
-    try:
-        #prix qui maximise le revenu immediat selon modeles 
-        sol = minimize_scalar(neg_rev, bounds=(5, 100), method="bounded")
-        return float(sol.x)
-    except Exception:
-        return None
-# en gros :
-#yope:prix qui maximise le revenu du jour, on s'en foutde demain.
-# estime la demande en fonctde notre prix et de celui du conc
-#teste tous les prix possibles entre 5,100 pour trouver celui qui maximise p × d(p).
-
-
-
-# DP ;one step lookhead 
-#là on prend en compte le lendemain aussi contrairement à myopic
-#
-
-def _lookahead_price(beta, gamma, delta=0.95):
-    β0, β1, β2 = beta
-    γ0, γ1 = gamma
-    # rmême modele que myopic
-    def revenue(p1):
-        p2 = γ0 + γ1 * p1 #reaction du conc
-        d = max(β0 + β1*p1 + β2*p2, 0)#demande prevue
-        return p1 * d #revenu du jour
-    #trouver le meilleur prix de demain
-    #calcul prix optimal
-    try:
-        res_future = minimize_scalar(
-            lambda p: -revenue(p),
-            bounds=(5, 100),
-            method="bounded"
-        )
-        p_future = float(res_future.x)
-        V_future = revenue(p_future) #valeur future poss
-    except Exception:
-        return None
-    # fonction objectif DP
-    def dp_neg_objective(p1):
-        return -(revenue(p1) + delta * V_future)
-    try:
-        sol = minimize_scalar(
-            dp_neg_objective,
-            bounds=(5, 100),
-            method="bounded"
-        )
-        return float(sol.x)
-    except Exception:
-        return None
-    #en gros :
-    #ne approximation de Bellman (dp simplifié)
-    # un agent non-myope
-    # qui anticipe la réaction future du marché
-
-
-# la strat réactive (le thermostat)
-def _reactive_price(last_price, last_demand):
-    if last_demand is None:
-        return last_price
-
-    if last_demand >= 3:
-        new_p = last_price * 1.05
-    elif last_demand == 0:
-        new_p = last_price * 0.95
+        p_comp = np.full_like(p_ours, np.mean(p_ours))#we invent a competitor price equal to our mean price
+    #we clip competitor prices (anti-outliers)
+    p_comp = np.array([_clip_pc(x) for x in p_comp], dtype=float)
+    #get competitor capacity history (0/1)
+    if cap_hist is None or len(cap_hist) < n:
+        cap_int = np.full(n, 1.0)  #=1 we assume competitor has capacity if no data
     else:
-        new_p = last_price
+        cap_int = cap_hist[-n:].astype(float) #last n values as float
+    #construction dataset and train XGBoost
+    #X: n rows, 3 columns (our price, competitor price, competitor capacity )
+    X = np.column_stack([p_ours, p_comp, cap_int])
+    #corresponding demand values
+    y = d[-n:]
+    #create DMatrix for XGBoost
+    dtrain = xgb.DMatrix(X, label=y)
+    #set XGBoost parameters
+    params = {
+        "objective": "reg:squarederror", #reg MSE
+        "eval_metric": "rmse",
+        "max_depth": 3,#limite overfitting
+        "eta": 0.08, #learning rate 
+        "subsample": 0.9,
+        "colsample_bytree": 0.9,
+        "min_child_weight": 5,#regularization 
+        "lambda": 1.0,#L2 regularization 
+        "verbosity": 0,
+        "seed": 42,
+    }
+    #train model
+    model = xgb.train(params, dtrain, num_boost_round=num_boost_round)
+    return model
 
-    return float(np.clip(new_p, 5, 100))
+
+# ============================================================
+# OFFLINE DP 
+# DO NOT call this inside p() (too slow).
+# goal : choose price to maximize discounted revenue proxy over horizon
+# ============================================================
+
+def dp_offline_best_price(
+    model_demand: xgb.Booster,
+    competitor_has_capacity: bool,
+    last_comp_price: float,
+    remaining_capacity: float = 80.0,
+    last_price: float = 60.0,
+    horizon: int = 6,#periods to look ahead
+    discount: float = 0.985,
+    trust_delta: float = 15.0,#no big jumps from last price
+    step: float = 2.0,#2eurs pr step in DP grid
+) -> float:
+    """
+    Offline DP that chooses price to maximize discounted revenue proxy over horizon.
+    State: (t, cap, last_price, last_comp_price)
+    Transition: competitor price assumed sticky (no gamma), demand by XGB.
+    """
+
+    cap_int = _bool_to_int(competitor_has_capacity)
+    base_grid = np.arange(PRICE_FLOOR, PRICE_CAP + 1e-9, step)#all possible prices
+
+    #candidate prices within trust region
+    #we only consider prices within trust_delta of last price
+    def candidates(p_prev: float) -> np.ndarray:
+        lo = max(PRICE_FLOOR, p_prev - trust_delta)
+        hi = min(PRICE_CAP, p_prev + trust_delta)
+        cand = base_grid[(base_grid >= lo) & (base_grid <= hi)]
+        return cand if cand.size else base_grid
+    #demand prediction function using XGBoost model
+    #build a feature row and predict mu mean demand
+    #cut at 0 (no negative demand)
+    #cut at cap_left(cannot sell more than remaining capacity)
+    def predict_demand(p_ours: float, p_comp: float, cap_left: float) -> float:
+        X = np.array([[p_ours, _clip_pc(p_comp), cap_int]], dtype=float)
+        mu = float(model_demand.predict(xgb.DMatrix(X))[0])
+        mu = max(0.0, mu)
+        return min(mu, float(cap_left))
+    
+    #simple competitor price prediction (sticky)
+    def predict_comp_next(p_comp_prev: float) -> float:
+        # simple sticky competitor (offline simplification)
+        return float(_clip_pc(p_comp_prev))
+
+    def disc_price(p: float) -> int:
+        return int(np.round(p / step) * step)
+
+    def disc_cap(c: float) -> int:
+        return int(np.round(c))
+
+    @lru_cache(maxsize=200_000)
+    def V(t: int, cap_i: int, p_last_i: int, p_comp_i: int) -> float:
+        if cap_i <= 0 or t >= horizon:
+            return 0.0
+
+        cap_left = float(cap_i)
+        p_last = float(p_last_i)
+        p_comp = float(p_comp_i)
+
+        best = -1e18
+        for p in candidates(p_last):
+            d = predict_demand(p, p_comp, cap_left)
+            r = p * d
+            p_comp_next = predict_comp_next(p_comp)
+            cap_next = disc_cap(cap_left - d)
+            val = r + discount * V(t + 1, cap_next, disc_price(p), disc_price(p_comp_next))
+            if val > best:
+                best = val
+        return float(best)
+
+    cap0 = disc_cap(remaining_capacity)
+    p_last0 = disc_price(last_price)
+    p_comp0 = disc_price(_clip_pc(last_comp_price))
+
+    best_p, best_val = float(np.clip(last_price, PRICE_FLOOR, PRICE_CAP)), -1e18
+    for p in candidates(float(p_last0)):
+        d = predict_demand(p, float(p_comp0), float(cap0))
+        r = p * d
+        cap_next = disc_cap(float(cap0) - d)
+        val = r + discount * V(1, cap_next, disc_price(p), p_comp0)
+        if val > best_val:
+            best_val, best_p = val, float(p)
+
+    return float(np.clip(best_p, PRICE_FLOOR, PRICE_CAP))
 
 
+# ============================================================
+# FAST ONLINE POLICY (for platform request time)
+# Derived from your binned revenue curves + can be justified by offline DP.
+# ============================================================
+
+def _fast_policy_target(cap: bool, last_comp_price: float) -> float:
+    pc = _clip_pc(last_comp_price)
+
+    if not cap:
+        # competitor no capacity -> revenue peak around ~40-45
+        base = 42.0
+        return base
+
+    # competitive -> revenue peak around ~35-40 with mild adjustment
+    if pc < 25:
+        return 35.0
+    if pc > 70:
+        return 40.0
+    return 37.0
 
 
-# Fonct principale DPC
+# ============================================================
+# Main function required by competition
+# ============================================================
 
 def p(
-        current_selling_season: int,
-        selling_period_in_current_season: int,
-        prices_historical_in_current_season: Union[np.ndarray, None],
-        demand_historical_in_current_season: Union[np.ndarray, None],
-        competitor_has_capacity_current_period_in_current_season: bool,
-        information_dump: Optional[Any] = None,
+    current_selling_season: int,
+    selling_period_in_current_season: int,
+    prices_historical_in_current_season: Union[np.ndarray, None],
+    demand_historical_in_current_season: Union[np.ndarray, None],
+    competitor_has_capacity_current_period_in_current_season: bool,
+    information_dump: Optional[Any] = None,
 ) -> Tuple[float, Any]:
 
-    # INIT
-    if information_dump is None:
+    # ---- init memory ----
+    if information_dump is None or not isinstance(information_dump, dict):
         information_dump = {
             "last_price": 60.0,
-            "beta": None,
-            "gamma": None,
+            "model_demand": None,
+            "n_trained": 0,
+            "cap_hist": [],
         }
 
     last_price = float(information_dump.get("last_price", 60.0))
+    last_comp_price = 60.0
 
-    # récupérer dernier prix
+    # ---- read last observed prices ----
     if prices_historical_in_current_season is not None:
-        arr = np.asarray(prices_historical_in_current_season, float)
+        arr = np.asarray(prices_historical_in_current_season, dtype=float)
         if arr.ndim == 2 and arr.shape[1] > 0:
             last_price = float(arr[0, -1])
+            if arr.shape[0] >= 2:
+                last_comp_price = float(arr[1, -1])
 
-    # récupérer dernière demande
-    last_demand = None
-    if demand_historical_in_current_season is not None and len(demand_historical_in_current_season) > 0:
-        last_demand = float(demand_historical_in_current_season[-1])
+    last_comp_price = _clip_pc(last_comp_price)
 
-    # MODELES
-    beta = _fit_demand_model(prices_historical_in_current_season,
-                             demand_historical_in_current_season,
-                             min_points=6)
-    gamma = _fit_competitor_reaction(prices_historical_in_current_season, min_points=6)
+    # ---- update cap history (0/1) ----
+    cap_hist = information_dump.get("cap_hist", [])
+    if not isinstance(cap_hist, list):
+        cap_hist = []
+    cap_hist.append(_bool_to_int(competitor_has_capacity_current_period_in_current_season))
+    information_dump["cap_hist"] = cap_hist
 
-    information_dump["beta"] = beta
-    information_dump["gamma"] = gamma
+    # ---- train XGBoost occasionally (NOT every call) ----
+    n_obs = 0
+    if prices_historical_in_current_season is not None:
+        arr = np.asarray(prices_historical_in_current_season, dtype=float)
+        if arr.ndim == 2:
+            n_obs = arr.shape[1]
 
-    price_model = None
+    model_demand = information_dump.get("model_demand", None)
+    n_trained = int(information_dump.get("n_trained", 0))
 
-    # --------- DP LOOKAHEAD SI MODEL ≠ None ---------
-    if beta is not None and gamma is not None:
-        price_dp = _lookahead_price(beta, gamma)
+    # retrain only if enough new data
+    if (n_obs >= 80) and (n_obs - n_trained >= 15):
+        cap_hist_arr = np.asarray(cap_hist, dtype=float)
+        model_demand = _fit_demand_model_xgb(
+            prices_historical_in_current_season,
+            demand_historical_in_current_season,
+            cap_hist_arr,
+            min_points=80,
+            num_boost_round=80,
+        )
+        information_dump["model_demand"] = model_demand
+        information_dump["n_trained"] = n_obs
 
-        if price_dp is not None:
-            price_model = price_dp
-        else:
-            price_model = _myopic_price(beta, gamma)
+    # ---- FAST decision (no DP online) ----
+    target = _fast_policy_target(
+        competitor_has_capacity_current_period_in_current_season,
+        last_comp_price
+    )
 
-        # bonus si concurrent out-of-capacity
-        if price_model is not None and not competitor_has_capacity_current_period_in_current_season:
-            price_model *= 1.03
-            price_model = float(np.clip(price_model, 5, 100))
+    # smooth move towards target (stable + avoids oscillations)
+    alpha = 0.30
+    candidate = (1 - alpha) * last_price + alpha * target
 
-    
-    price_reactive = _reactive_price(last_price, last_demand)
+    # trust region (avoid extreme jumps)
+    candidate = float(np.clip(candidate, last_price * 0.75, last_price * 1.25))
 
-    # COMBINAISON : 70% DP / 30% réactif
-    if price_model is not None:
-        candidate = 0.7*price_model + 0.3*price_reactive
-    else:
-        candidate = price_reactive
-
-    # TRUST REGION
-    new_price = float(np.clip(candidate,
-                              last_price * 0.7,
-                              last_price * 1.3))
-
-    new_price = float(np.clip(new_price, 5, 100))
+    new_price = float(np.clip(candidate, PRICE_FLOOR, PRICE_CAP))
 
     information_dump["last_price"] = new_price
-
     return new_price, information_dump
-
